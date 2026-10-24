@@ -19,13 +19,49 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Django system check
-        env:
-          DJANGO_SETTINGS_MODULE: djangoproj.settings
         run: python manage.py check
       - name: Compile Python files
         run: python -m compileall -q djangoapp djangoproj manage.py
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server/frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: server/frontend/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Build React frontend
+        env:
+          CI: "false"
+        run: npm run build
+
+  node-service-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server/database
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install API dependencies
+        run: npm install
+      - name: Check JavaScript syntax
+        run: node --check app.js
