@@ -11,6 +11,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from .models import CarMake, CarModel
 from .restapis import analyze_review_sentiments, get_request, post_review
+from .populate import initiate
 
 logger = logging.getLogger(__name__)
 
@@ -158,6 +159,8 @@ def get_cars(request):
 
 @require_GET
 def get_all_car_makes(request):
+    if not CarMake.objects.exists():
+        initiate()
     makes = CarMake.objects.prefetch_related("models").all()
     return JsonResponse({
         "status": 200,
