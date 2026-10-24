@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "../assets/style.css";
 import "../assets/bootstrap.min.css";
 
+const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\\/$/, "");
+
 const Header = () => {
   const [error, setError] = useState("");
   const username = sessionStorage.getItem("username");
@@ -11,7 +13,7 @@ const Header = () => {
     event.preventDefault();
     setError("");
     try {
-      const response = await fetch("/djangoapp/logout", {
+      const response = await fetch(`${API_BASE}/logout`, {
         method: "GET",
         credentials: "include",
       });
@@ -43,7 +45,7 @@ const Header = () => {
               {username ? (
                 <>
                   <span className="username" style={{ fontSize: "1rem", color: "#10243a" }}>{username}</span>
-                  <a className="nav-link" href="/djangoapp/logout" onClick={logout}>Logout</a>
+                  <a className="nav-link" href={`${API_BASE}/logout`} onClick={logout}>Logout</a>
                 </>
               ) : (
                 <>
