@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./Login.css";
 import Header from "../Header/Header";
 
-const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\\/$/, "");
+const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\/+$/, "");
 
 const Login = () => {
   const [userName, setUserName] = useState("");
