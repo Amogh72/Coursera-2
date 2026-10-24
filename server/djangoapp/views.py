@@ -1,65 +1,183 @@
-# Uncomment the required imports before adding the code
-
-# from django.shortcuts import render
-# from django.http import HttpResponseRedirect, HttpResponse
-# from django.contrib.auth.models import User
-# from django.shortcuts import get_object_or_404, render, redirect
-# from django.contrib.auth import logout
-# from django.contrib import messages
-# from datetime import datetime
-
-from django.http import JsonResponse
-from django.contrib.auth import login, authenticate
-import logging
 import json
+import logging
+
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
-# from .populate import initiate
+from django.views.decorators.http import require_GET, require_POST
 
+from .models import CarMake, CarModel
+from .restapis import analyze_review_sentiments, get_request, post_review
 
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
-# Create your views here.
+def _json_body(request):
+    try:
+        return json.loads(request.body.decode("utf-8") or "{}")
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return None
 
-# Create a `login_request` view to handle sign in request
+
+def _backend_error(exc):
+    logger.warning("Backend service request failed: %s", exc)
+    return JsonResponse({"status": 502, "error": "The dealership service is temporarily unavailable."}, status=502)
+
+
 @csrf_exempt
+@require_POST
 def login_user(request):
-    # Get username and password from request.POST dictionary
-    data = json.loads(request.body)
-    username = data['userName']
-    password = data['password']
-    # Try to check if provide credential can be authenticated
-    user = authenticate(username=username, password=password)
-    data = {"userName": username}
-    if user is not None:
-        # If user is valid, call login method to login current user
-        login(request, user)
-        data = {"userName": username, "status": "Authenticated"}
-    return JsonResponse(data)
+    data = _json_body(request)
+    if data is None:
+        return JsonResponse({"status": "Invalid JSON"}, status=400)
+    username = str(data.get("userName", data.get("username", ""))).strip()
+    password = str(data.get("password", ""))
+    user = authenticate(request, username=username, password=password)
+    if user is None:
+        return JsonResponse({"userName": username, "status": "Invalid credentials"}, status=401)
+    login(request, user)
+    return JsonResponse({
+        "userName": user.username,
+        "firstName": user.first_name,
+        "lastName": user.last_name,
+        "status": "Authenticated",
+    })
 
-# Create a `logout_request` view to handle sign out request
-# def logout_request(request):
-# ...
 
-# Create a `registration` view to handle sign up request
-# @csrf_exempt
-# def registration(request):
-# ...
+@require_GET
+def logout_request(request):
+    logout(request)
+    return JsonResponse({"status": "Logged out"})
 
-# # Update the `get_dealerships` view to render the index page with
-# a list of dealerships
-# def get_dealerships(request):
-# ...
 
-# Create a `get_dealer_reviews` view to render the reviews of a dealer
-# def get_dealer_reviews(request,dealer_id):
-# ...
+@csrf_exempt
+@require_POST
+def registration(request):
+    data = _json_body(request)
+    if data is None:
+        return JsonResponse({"status": "Invalid JSON"}, status=400)
+    username = str(data.get("userName", data.get("username", ""))).strip()
+    password = str(data.get("password", ""))
+    email = str(data.get("email", "")).strip()
+    first_name = str(data.get("firstName", data.get("first_name", ""))).strip()
+    last_name = str(data.get("lastName", data.get("last_name", ""))).strip()
+    if not username or not password or not email:
+        return JsonResponse({"error": "Username, email, and password are required."}, status=400)
+    if len(password) < 8:
+        return JsonResponse({"error": "Password must contain at least 8 characters."}, status=400)
+    if User.objects.filter(username=username).exists():
+        return JsonResponse({"error": "That username is already registered."}, status=409)
+    if User.objects.filter(email__iexact=email).exists():
+        return JsonResponse({"error": "That email is already registered."}, status=409)
+    user = User.objects.create_user(
+        username=username, password=password, email=email,
+        first_name=first_name, last_name=last_name,
+    )
+    return JsonResponse({"status": "Registered", "userName": user.username}, status=201)
 
-# Create a `get_dealer_details` view to render the dealer details
-# def get_dealer_details(request, dealer_id):
-# ...
 
-# Create a `add_review` view to submit a review
-# def add_review(request):
-# ...
+@require_GET
+def get_dealerships(request):
+    try:
+        dealers = get_request("fetchDealers")
+        return JsonResponse({"status": 200, "dealers": dealers})
+    except Exception as exc:
+        return _backend_error(exc)
+
+
+@require_GET
+def get_dealers_by_state(request, state):
+    try:
+        dealers = get_request(f"fetchDealers/{state}")
+        return JsonResponse({"status": 200, "dealers": dealers})
+    except Exception as exc:
+        return _backend_error(exc)
+
+
+@require_GET
+def get_dealer_details(request, dealer_id):
+    try:
+        dealer = get_request(f"fetchDealer/{dealer_id}")
+        return JsonResponse({"status": 200, "dealer": [dealer]})
+    except Exception as exc:
+        logger.warning("Could not fetch dealer %s: %s", dealer_id, exc)
+        return JsonResponse({"status": 404, "dealer": [], "error": "Dealership not found."}, status=404)
+
+
+@require_GET
+def get_dealer_reviews(request, dealer_id):
+    try:
+        reviews = get_request(f"fetchReviews/dealer/{dealer_id}")
+        for item in reviews:
+            item["sentiment"] = analyze_review_sentiments(item.get("review", ""))
+        return JsonResponse({"status": 200, "reviews": reviews})
+    except Exception as exc:
+        return _backend_error(exc)
+
+
+@csrf_exempt
+@require_POST
+def add_review(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"status": 401, "error": "Please log in before posting a review."}, status=401)
+    data = _json_body(request)
+    if data is None:
+        return JsonResponse({"status": 400, "error": "Invalid JSON."}, status=400)
+    required = ("dealership", "review", "purchase_date", "car_make", "car_model", "car_year")
+    if any(data.get(field) in (None, "") for field in required):
+        return JsonResponse({"status": 400, "error": "Please complete every review field."}, status=400)
+    if not str(data.get("review", "")).strip():
+        return JsonResponse({"status": 400, "error": "Review text cannot be empty."}, status=400)
+    payload = dict(data)
+    payload["name"] = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+    try:
+        payload["dealership"] = int(payload["dealership"])
+        payload["car_year"] = int(payload["car_year"])
+        result = post_review(payload)
+        result["sentiment"] = analyze_review_sentiments(payload["review"])
+        return JsonResponse({"status": 200, "review": result}, status=201)
+    except Exception as exc:
+        return _backend_error(exc)
+
+
+@require_GET
+def get_cars(request):
+    try:
+        cars = get_request("fetchCars")
+        unique = {}
+        for car in cars:
+            key = (car.get("make", ""), car.get("model", ""))
+            unique[key] = {"CarMake": key[0], "CarModel": key[1]}
+        return JsonResponse({"status": 200, "CarModels": list(unique.values())})
+    except Exception as exc:
+        return _backend_error(exc)
+
+
+@require_GET
+def get_all_car_makes(request):
+    makes = CarMake.objects.prefetch_related("models").all()
+    return JsonResponse({
+        "status": 200,
+        "CarMakes": [
+            {"id": make.id, "CarMake": make.name, "CarModels": [
+                {"id": model.id, "CarModel": model.name, "Type": model.type, "Year": model.year}
+                for model in make.models.all()
+            ]}
+            for make in makes
+        ]
+    })
+
+
+def home(request):
+    return render(request, "Home.html")
+
+
+def about(request):
+    return render(request, "About.html")
+
+
+def contact(request):
+    return render(request, "Contact.html")
