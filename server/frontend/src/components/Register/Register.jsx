@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import Header from "../Header/Header";
+import "./Register.css";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "/djangoapp";
 
@@ -41,7 +43,9 @@ export default function Register() {
   };
 
   return (
-    <main className="container py-5" style={{ maxWidth: 560 }}>
+    <div>
+      <Header />
+      <main className="container py-5" style={{ maxWidth: 560 }}>
       <h1 className="mb-2">Create your account</h1>
       <p className="text-muted mb-4">Join Cars Dealership to share and read dealership reviews.</p>
       <form onSubmit={handleSubmit} className="card card-body shadow-sm">
@@ -63,6 +67,7 @@ export default function Register() {
         <button className="btn btn-primary" type="submit" disabled={busy}>{busy ? "Registering…" : "Register"}</button>
         {message && <p className="mt-3 mb-0" role="status">{message}</p>}
       </form>
-    </main>
+      </main>
+    </div>
   );
 }
