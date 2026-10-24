@@ -1,72 +1,54 @@
-import React, { useState } from 'react';
-
+import React, { useState } from "react";
 import "./Login.css";
-import Header from '../Header/Header';
+import Header from "../Header/Header";
 
-const Login = ({ onClose }) => {
-
+const Login = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [open,setOpen] = useState(true)
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  let login_url = window.location.origin+"/djangoapp/login";
-
-  const login = async (e) => {
-    e.preventDefault();
-
-    const res = await fetch(login_url, {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+    setBusy(true);
+    try {
+      const response = await fetch("/djangoapp/login", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            "userName": userName,
-            "password": password
-        }),
-    });
-    
-    const json = await res.json();
-    if (json.status != null && json.status === "Authenticated") {
-        sessionStorage.setItem('username', json.userName);
-        setOpen(false);        
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ userName, password }),
+      });
+      const data = await response.json();
+      if (!response.ok || data.status !== "Authenticated") {
+        throw new Error(data.status || data.error || "The user could not be authenticated.");
+      }
+      sessionStorage.setItem("username", data.userName);
+      sessionStorage.setItem("firstname", data.firstName || "");
+      sessionStorage.setItem("lastname", data.lastName || "");
+      window.location.assign("/dealers");
+    } catch (err) {
+      setError(err.message || "Unable to connect to the login service.");
+    } finally {
+      setBusy(false);
     }
-    else {
-      alert("The user could not be authenticated.")
-    }
-};
-
-  if (!open) {
-    window.location.href = "/";
   };
-  
 
   return (
     <div>
-      <Header/>
-    <div onClick={onClose}>
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-        className='modalContainer'
-      >
-          <form className="login_panel" style={{}} onSubmit={login}>
-              <div>
-              <span className="input_field">Username </span>
-              <input type="text"  name="username" placeholder="Username" className="input_field" onChange={(e) => setUserName(e.target.value)}/>
-              </div>
-              <div>
-              <span className="input_field">Password </span>
-              <input name="psw" type="password"  placeholder="Password" className="input_field" onChange={(e) => setPassword(e.target.value)}/>            
-              </div>
-              <div>
-              <input className="action_button" type="submit" value="Login"/>
-              <input className="action_button" type="button" value="Cancel" onClick={()=>setOpen(false)}/>
-              </div>
-              <a className="loginlink" href="/register">Register Now</a>
-          </form>
-      </div>
-    </div>
+      <Header />
+      <main className="container py-5" style={{ maxWidth: 560 }}>
+        <h1>Login</h1>
+        <form className="card card-body" onSubmit={handleSubmit}>
+          <label className="form-label" htmlFor="username">Username</label>
+          <input id="username" name="username" className="form-control mb-3" autoComplete="username" value={userName} onChange={(event) => setUserName(event.target.value)} required />
+          <label className="form-label" htmlFor="password">Password</label>
+          <input id="password" name="password" type="password" className="form-control mb-3" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+          <button className="btn btn-primary" type="submit" disabled={busy}>{busy ? "Signing in…" : "Login"}</button>
+          {error && <p className="text-danger mt-3" role="alert">{error}</p>}
+          <p className="mt-3 mb-0">New here? <a href="/register">Register now</a>.</p>
+        </form>
+      </main>
     </div>
   );
 };
