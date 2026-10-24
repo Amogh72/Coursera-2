@@ -8,7 +8,7 @@ import negativeIcon from "../assets/negative.png";
 import reviewIcon from "../assets/reviewbutton.png";
 import Header from "../Header/Header";
 
-const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\\/$/, "");
+const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\/+$/, "");
 
 const sentimentIcon = (sentiment) => {
   if (sentiment === "positive") return positiveIcon;
