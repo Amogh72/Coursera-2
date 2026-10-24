@@ -1,68 +1,35 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <!-- Link the style sheet here -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About Us | Cars Dealership</title>
+  <link rel="stylesheet" href="/static/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/style.css">
 </head>
-<div>
-  <nav class="navbar navbar-expand-lg navbar-light" style="background-color:darkturquoise; height: 1in;">
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light" style="background-color:darkturquoise;min-height:1in">
     <div class="container-fluid">
-      <h2 style="padding-right: 5%;">Dealerships</h2>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarText">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link" style="font-size: larger;" aria-current="page" href="/">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" style="font-size: larger;" href="/about">About Us</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" style="font-size: larger;" href="/contact">Contact Us</a>
-          </li>
-        </ul>
+      <a class="navbar-brand" href="/"><strong>Cars Dealership</strong></a>
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link active" aria-current="page" href="/about/">About Us</a>
+        <a class="nav-link" href="/contact/">Contact Us</a>
       </div>
     </div>
   </nav>
-  
-    <div class="card" style="width: 80%;margin: auto; margin-top:5%;">
-      <div class="banner" name="about-header">
-      <!-- Insert header information here -->
-      </div>
-      <div style="display: flex;flex-direction: row; margin:auto">
-      <div class="card" style="width: 30%;">
-        <img class="card-img-top" src="/static/person.png" alt="Card image">
-        <div class="card-body">
-          <p class="title">Person1</p>
-          <p>Person1 Title</p>
-          <p class="card-text">Some text that explains the person1 in about 2 short sentences</p>
-          <p>person1@example.com</p>
-        </div>
-      </div>
-
-      <div class="card" style="width: 30%;">
-        <img class="card-img-top" src="/static/person.png" alt="Card image">
-        <div class="card-body">
-          <p class="title">Person2</p>
-          <p>Person2 Title</p>
-          <p class="card-text">Some text that explains the person2 in about 2 short sentences</p>
-          <p>person2@example.com</p>
-        </div>
-      </div>
-
-      <div class="card" style="width: 30%;">
-        <img class="card-img-top" src="/static/person.png" alt="Card image">
-        <div class="card-body">
-          <p class="title">Person3</p>
-          <p>Person3 Title</p>
-          <p class="card-text">Some text that explains the person3 in about 2 short sentences</p>
-          <p>person3@example.com</p>
-        </div>
-      </div>
-    </div>
-    </div>
-    </div>
-    
-</div>
-
+  <main class="container py-5" style="max-width:1000px">
+    <section class="p-4 p-md-5 rounded-4 text-white" style="background:#10243a">
+      <p class="text-uppercase mb-2">About our platform</p>
+      <h1>Making dealership discovery simpler</h1>
+      <p class="lead mb-0">Cars Dealership brings dealership locations and customer experiences together in one convenient place.</p>
+    </section>
+    <section class="row g-4 mt-2">
+      <div class="col-md-4"><article class="card h-100 p-4"><h2 class="h4">Explore locations</h2><p class="mb-0">Browse dealership details and filter locations by state to find options that suit your needs.</p></article></div>
+      <div class="col-md-4"><article class="card h-100 p-4"><h2 class="h4">Learn from reviews</h2><p class="mb-0">Read customer experiences and see sentiment labels that help you quickly understand review tone.</p></article></div>
+      <div class="col-md-4"><article class="card h-100 p-4"><h2 class="h4">Share your experience</h2><p class="mb-0">Registered users can contribute dealership reviews and help other customers make informed choices.</p></article></div>
+    </section>
+    <p class="text-muted mt-4">This application was created as a full-stack learning project using Django, React, Node.js, and MongoDB.</p>
+  </main>
+</body>
 </html>
