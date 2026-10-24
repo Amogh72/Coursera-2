@@ -4,6 +4,8 @@ import "../assets/style.css";
 import Header from "../Header/Header";
 import reviewIcon from "../assets/reviewicon.png";
 
+const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\\/$/, "");
+
 const Dealers = () => {
   const [dealers, setDealers] = useState([]);
   const [states, setStates] = useState([]);
@@ -18,8 +20,8 @@ const Dealers = () => {
       setError("");
       try {
         const endpoint = selectedState === "All"
-          ? "/djangoapp/get_dealers"
-          : `/djangoapp/get_dealers/${encodeURIComponent(selectedState)}`;
+          ? `${API_BASE}/get_dealers`
+          : `${API_BASE}/get_dealers/${encodeURIComponent(selectedState)}`;
         const response = await fetch(endpoint, { credentials: "include" });
         const data = await response.json();
         if (!response.ok || data.status !== 200) {
