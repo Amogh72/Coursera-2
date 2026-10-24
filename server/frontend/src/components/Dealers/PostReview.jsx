@@ -4,6 +4,8 @@ import "./Dealers.css";
 import "../assets/style.css";
 import Header from "../Header/Header";
 
+const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\\/$/, "");
+
 const PostReview = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -20,8 +22,8 @@ const PostReview = () => {
     const load = async () => {
       try {
         const [dealerResponse, carsResponse] = await Promise.all([
-          fetch(`/djangoapp/dealer/${id}`, { credentials: "include" }),
-          fetch("/djangoapp/get_cars"),
+          fetch(`${API_BASE}/dealer/${id}`, { credentials: "include" }),
+          fetch(`${API_BASE}/get_cars`),
         ]);
         const dealerData = await dealerResponse.json();
         const carsData = await carsResponse.json();
@@ -54,7 +56,7 @@ const PostReview = () => {
     setBusy(true);
     try {
       const [carMake, carModel] = model.split("|||");
-      const response = await fetch("/djangoapp/add_review", {
+      const response = await fetch(`${API_BASE}/add_review`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
