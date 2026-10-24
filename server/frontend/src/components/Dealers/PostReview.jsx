@@ -4,7 +4,7 @@ import "./Dealers.css";
 import "../assets/style.css";
 import Header from "../Header/Header";
 
-const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\\/$/, "");
+const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\/+$/, "");
 
 const PostReview = () => {
   const { id } = useParams();
