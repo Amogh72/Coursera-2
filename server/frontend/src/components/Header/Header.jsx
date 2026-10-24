@@ -5,6 +5,7 @@ import "../assets/bootstrap.min.css";
 const Header = () => {
   const [error, setError] = useState("");
   const username = sessionStorage.getItem("username");
+  const djangoSite = process.env.REACT_APP_DJANGO_SITE_URL || window.location.origin;
 
   const logout = async (event) => {
     event.preventDefault();
@@ -35,8 +36,8 @@ const Header = () => {
           <div className="collapse navbar-collapse" id="navbarText">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item"><a className="nav-link" href="/">Home</a></li>
-              <li className="nav-item"><a className="nav-link" href="/about/">About Us</a></li>
-              <li className="nav-item"><a className="nav-link" href="/contact/">Contact Us</a></li>
+              <li className="nav-item"><a className="nav-link" href={`${djangoSite}/about/`}>About Us</a></li>
+              <li className="nav-item"><a className="nav-link" href={`${djangoSite}/contact/`}>Contact Us</a></li>
             </ul>
             <div className="d-flex align-items-center gap-3">
               {username ? (
