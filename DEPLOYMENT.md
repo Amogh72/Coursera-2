@@ -6,7 +6,7 @@ The code is prepared for local development, but **no cloud deployment has been c
 1. **MongoDB** — managed MongoDB or a persistent database service.
 2. **Node API** — build from `server/database/Dockerfile`; set `MONGO_URL` to the database connection string and `PORT` to the platform-provided port.
 3. **Sentiment API** — build from `server/djangoapp/microservices/Dockerfile`; it listens on port 5050 by default.
-4. **Django** — build from the `server` directory and install `requirements.txt`. Run migrations before starting Gunicorn, for example `gunicorn djangoproj.wsgi:application --bind 0.0.0.0:$PORT`.
+4. **Django** — build from the `server` directory and install `requirements.txt`. Run migrations and collect static assets before starting Gunicorn, for example `python manage.py migrate`, `python manage.py collectstatic --noinput`, then `gunicorn djangoproj.wsgi:application --bind 0.0.0.0:$PORT`.
 5. **React frontend** — build from `server/frontend` with `npm ci && npm run build`, then serve the generated build using your chosen static hosting or web server.
 
 ## Required configuration
