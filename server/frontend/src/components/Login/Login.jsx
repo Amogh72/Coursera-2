@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "./Login.css";
 import Header from "../Header/Header";
 
+const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\\/$/, "");
+
 const Login = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -13,7 +15,7 @@ const Login = () => {
     setError("");
     setBusy(true);
     try {
-      const response = await fetch("/djangoapp/login", {
+      const response = await fetch(`${API_BASE}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
