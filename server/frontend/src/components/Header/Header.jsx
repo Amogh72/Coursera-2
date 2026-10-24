@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../assets/style.css";
 import "../assets/bootstrap.min.css";
 
-const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\\/$/, "");
+const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\/+$/, "");
 
 const Header = () => {
   const [error, setError] = useState("");
