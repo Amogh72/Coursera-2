@@ -13,6 +13,15 @@ services:
       timeout: 3s
       retries: 20
 
+  sentiment:
+    build:
+      context: ../djangoapp/microservices
+      dockerfile: Dockerfile
+    container_name: sentiment_api
+    restart: unless-stopped
+    ports:
+      - "5050:5050"
+
   api:
     build:
       context: .
