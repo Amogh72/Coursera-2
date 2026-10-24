@@ -102,6 +102,12 @@ app.post("/insert_review", async (req, res) => {
     if (!Number.isFinite(dealerId) || !Number.isFinite(carYear)) {
       return res.status(400).json({ error: "Dealership and car year must be numbers" });
     }
+    if (carYear < 2015 || carYear > 2023) {
+      return res.status(400).json({ error: "Car year must be between 2015 and 2023" });
+    }
+    if (!String(data.review).trim()) {
+      return res.status(400).json({ error: "Review text cannot be empty" });
+    }
     const dealer = await Dealerships.findOne({ id: dealerId });
     if (!dealer) return res.status(404).json({ error: "Dealership not found" });
     const latest = await Reviews.findOne().sort({ id: -1 }).select("id").lean();
