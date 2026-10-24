@@ -8,6 +8,8 @@ import negativeIcon from "../assets/negative.png";
 import reviewIcon from "../assets/reviewbutton.png";
 import Header from "../Header/Header";
 
+const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\\/$/, "");
+
 const sentimentIcon = (sentiment) => {
   if (sentiment === "positive") return positiveIcon;
   if (sentiment === "negative") return negativeIcon;
@@ -28,8 +30,8 @@ const Dealer = () => {
       setError("");
       try {
         const [dealerResponse, reviewsResponse] = await Promise.all([
-          fetch(`/djangoapp/dealer/${id}`, { credentials: "include" }),
-          fetch(`/djangoapp/reviews/dealer/${id}`, { credentials: "include" }),
+          fetch(`${API_BASE}/dealer/${id}`, { credentials: "include" }),
+          fetch(`${API_BASE}/reviews/dealer/${id}`, { credentials: "include" }),
         ]);
         const dealerData = await dealerResponse.json();
         const reviewsData = await reviewsResponse.json();
