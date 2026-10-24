@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Header from "../Header/Header";
 import "./Register.css";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "/djangoapp";
+const API_BASE = (process.env.REACT_APP_API_BASE || "/djangoapp").replace(/\/+$/, "");
 
 export default function Register() {
   const [form, setForm] = useState({
