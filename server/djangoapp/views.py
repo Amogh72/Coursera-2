@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -175,7 +176,12 @@ def get_all_car_makes(request):
 
 
 def home(request):
-    return render(request, "Home.html")
+    frontend_url = os.getenv("FRONTEND_URL", "http://127.0.0.1:3000").rstrip("/")
+    return render(request, "Home.html", {"frontend_url": frontend_url})
+
+
+def dealers_home(request):
+    return redirect(os.getenv("FRONTEND_URL", "http://127.0.0.1:3000").rstrip("/") + "/dealers")
 
 
 def about(request):
