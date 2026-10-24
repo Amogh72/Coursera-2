@@ -10,6 +10,6 @@ urlpatterns = [
     path("djangoapp/", include("djangoapp.urls")),
     path("about/", views.about, name="about"),
     path("contact/", views.contact, name="contact"),
-    path("dealers/", views.home, name="dealers_home"),
+    path("dealers/", views.dealers_home, name="dealers_home"),
     path("", views.home, name="home"),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
