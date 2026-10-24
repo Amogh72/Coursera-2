@@ -13,8 +13,9 @@ The code is prepared for local development, but **no cloud deployment has been c
 Configure platform environment variables rather than committing credentials:
 - Django: `DJANGO_SECRET_KEY` (unique strong value), `DJANGO_DEBUG=False`, `DJANGO_ALLOWED_HOSTS`, and `DJANGO_CSRF_TRUSTED_ORIGINS` as appropriate.
 - Django service clients: `backend_url` and `sentiment_analyzer_url` pointing to the deployed Node and sentiment services.
+- Cross-origin frontend (only if hosted on a different origin): `CORS_ALLOWED_ORIGINS` set to the exact React origin, `DJANGO_CSRF_TRUSTED_ORIGINS` set to trusted HTTPS origins, and session cookies served over HTTPS. Credentialed CORS is enabled, but only configured origins are allowed.
 - Homepage link: `FRONTEND_URL` pointing to the deployed React site.
-- React build: `REACT_APP_DJANGO_SITE_URL` pointing to the Django website. For a separate frontend origin, configure API routing and session/CORS settings consistently; do not assume the local CRA proxy works in production.
+- React build: `REACT_APP_DJANGO_SITE_URL` pointing to the Django website and `REACT_APP_API_BASE` pointing to the Django API base, e.g. `https://your-django-host.example/djangoapp`. The default `/djangoapp` works when frontend and backend share an origin. Do not assume the local CRA proxy works in production.
 - Node: `MONGO_URL` and `PORT`.
 
 The local `server/djangoapp/.env` contains non-secret localhost defaults for development. Replace those values through platform configuration for deployment. Do not use the development secret key in production.
